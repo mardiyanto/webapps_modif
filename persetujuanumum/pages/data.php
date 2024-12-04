@@ -20,15 +20,21 @@
                     <td width="100%">
                         <b>A. Tarif Ruang Perawatan</b><br>
                         <table class="default" width="99%" border="0" align="center" cellpadding="3px" cellspacing="0px">
+                      <?php 
+                    $sql ="SELECT kelas, trf_kamar FROM kamar WHERE statusdata='1' GROUP BY kelas";
+                    $hasil=bukaquery($sql);
+                    while ($data = mysqli_fetch_array ($hasil)){
+                  ?>
                             <tr class="text-dark">
-                                <td width="30%">Kelas 3</td><td width="20%">Rp. 200.000</td><td width="30%">VIP</td><td width="20%">Rp. 600.000</td>
+                                 <td width='50%'><?= $data['kelas'];?></td><td width='50%' align='center'>harga : Rp <?= number_format($data['trf_kamar'], 0, ".",",");?></td>
                             </tr>
-                            <tr class="text-dark">
+                             <?php } ?>
+                            <!-- <tr class="text-dark">
                                 <td width="30%">Kelas 2</td><td width="20%">Rp. 300.000</td><td width="30%">VVIP</td><td width="20%">Rp. 800.000</td>
                             </tr>
                             <tr class="text-dark">
                                 <td width="30%">Kelas 1</td><td width="20%">Rp. 400.000</td><td width="30%">Isolasi</td><td width="20%">Rp. 500.000</td>
-                            </tr>
+                            </tr> -->
                         </table>
                     </td>
                 </tr>
@@ -53,13 +59,13 @@
                         <b>C. Angsuran Awal</b><br>
                         <table class="default" width="99%" border="0" align="center" cellpadding="3px" cellspacing="0px">
                             <tr class="text-dark">
-                                <td width="30%">Kelas 3</td><td width="20%">Rp. 600.000</td><td width="30%">VIP</td><td width="20%">Rp. 1.800.000</td>
+                                <td width="30%">Kelas 3</td><td width="20%">Rp. 50.000</td><td width="30%">VIP</td><td width="20%">Rp. 200.000</td>
                             </tr>
                             <tr class="text-dark">
-                                <td width="30%">Kelas 2</td><td width="20%">Rp. 900.000</td><td width="30%">VVIP</td><td width="20%">Rp. 2.400.000</td>
+                                <td width="30%">Kelas 2</td><td width="20%">Rp. 70.000</td><td width="30%">VVIP</td><td width="20%">Rp. 200.000</td>
                             </tr>
                             <tr class="text-dark">
-                                <td width="30%">Kelas 1</td><td width="20%">Rp. 1.200.000</td><td width="30%">Isolasi</td><td width="20%">Rp. 1.500.000</td>
+                                <td width="30%">Kelas 1</td><td width="20%">Rp. 100.000</td><td width="30%">Isolasi</td><td width="20%">Rp.200.000</td>
                             </tr>
                         </table>
                     </td>
@@ -299,7 +305,7 @@
                     <td width="2%" valign="top">9.</td><td width="98%">Saya menyatakan bahwa say telah menerima infiormasi tentang adanya tatacara mengajukan keluhan terhadap pelayanan kesehatan terhadap diri say dan say setuju untuk mengikuti tata cara mengajukan keluhan tersebut sesuai dengan prosedur yang ada di <?=$namars?>.</td>
                 </tr>
                 <tr class="text-dark">
-                    <td width="2%" valign="top">10.</td><td width="98%">Melalui dokumen ini saya sampaikan bahwa saya atau keluarga saya memiliki nilai kepercayaan dalam pengobatan atau perawatan yang antara lain adalah <input name="nilai_kepercayaan" type="text" id="TxtIsi1" size="40" maxlength="50" pattern="[a-zA-Z0-9, ./@_-]{1,50}" title=" a-zA-Z0-9, ./@_- (Maksimal 50 karakter)" autocomplete="off"></td>
+                    <td width="2%" valign="top">10.</td><td width="98%">Melalui dokumen ini saya sampaikan bahwa saya atau keluarga saya memiliki nilai kepercayaan dalam pengobatan atau perawatan yang antara lain adalah <input name="nilai_kepercayaan" type="text" id="TxtIsi1" size="40" value="100 % percaya"maxlength="50" pattern="[a-zA-Z0-9, ./@_-]{1,50}" title=" a-zA-Z0-9, ./@_- (Maksimal 50 karakter)" autocomplete="off"></td>
                 </tr>
                 <tr class="text-dark">
                     <td width="2%" valign="top">11.</td><td width="98%">Melalui dokumen ini saya menegaskan kembali bahwa saya mempercayakan kepada semua tenaga kesehatan yang ada di <?=$namars?> untuk memberikan perawatan diagnostik dan terapi kepada saya sebagai pasien rawat inap, rawat jalan, maupun gawat darurat termasuk pemeriksaan penunjang yang dibutuhkan untuk pengobatan dan tindakan.</td>

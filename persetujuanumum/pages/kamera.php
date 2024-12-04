@@ -61,7 +61,6 @@
         $no_telp        = $data2['no_telp'];
     }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,55 +69,20 @@
     <link rel="stylesheet" href="css/modal.css" />
     <link rel="stylesheet" href="css/csssurat.css" />
     <style>
-    .signature-pad {
-        border: 1px solid #000;
-        width: 100%;
-        height: auto;
-        max-height: 300px; /* Batas maksimum tinggi */
-    }
-
-    @media (max-width: 768px) {
         .signature-pad {
-            height: 200px; /* Kurangi tinggi pada layar kecil */
+            border: 1px solid #000;
+            width: 100%;
+            height: 300px;
         }
-    }
-
-    @media (max-width: 480px) {
-        .signature-pad {
-            height: 150px; /* Lebih kecil untuk layar sangat kecil */
-        }
-    }
-
-    #results {
-            margin-top: 20px;
+        #results {
             padding: 10px;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
+            background: #EEFFEE;
             text-align: center;
-            /* width: 100%;
-            max-width: 600px; */
         }
-}
-</style>
-
+    </style>
 </head>
 <body>
-
     <div class="container">
-    <div class="header">
-        <!-- Logo -->
-        <img src="../logo.png" alt="Logo Lampung" class="logo">
-        <!-- Nomor RM -->
-        <div class="rm-number">NO. <?=$nosurat;?></div>
-        <!-- Teks Utama -->
-        <div >
-            <h2><?=$namars?></h2>
-            <p>Jl. Pramuka No. 88 Rajabasa Bandar Lampung</p>
-            <p>Telp. (0721) 706402 Fax. (0721) 706402</p>
-        </div>
-    </div>
-    <!-- Garis Horizontal -->
-    <div class="divider"></div>
         <h5 class="text-dark">
             <center>
                 <button class="btn btn-secondary" onclick="window.location.reload();">Refresh</button>
@@ -127,19 +91,15 @@
             </center>
         </h5>
         <h7 class="text-dark"><center>Tanggal <?=$tanggal;?></center></h7><br/>
-        
-        <form method="POST" action="pages/storeImage.php" onsubmit="return validasiIsi();" enctype="multipart/form-data">
+
+        <form method="POST" action="pages/storeImage.php" enctype="multipart/form-data">
             <input type="hidden" name="nosurat" value="<?=$nosurat;?>">
             <input type="hidden" name="image" class="image-tag">
-            
+
             <h7 class="text-dark"><b>TANDATANGAN DI SINI</b></h7>
             <canvas id="signaturePad" class="signature-pad"></canvas><br>
-            <button type="button" id="clearBtn" class="btn btn-secondary">Ulangi Tanda Tangan</button><br>
-            <br/>
-           <!-- Button trigger modal -->
-    <!-- Tombol untuk Membuka Modal -->
-        <!-- Tombol untuk Membuka Modal -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+            <button type="button" id="clearBtn" class="btn btn-secondary">Ulangi Tanda Tangan</button><br><br>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
        BACA PERSETUJUAN UMUM
     </button>
     <!-- Modal -->
@@ -163,179 +123,162 @@
         </div>
     </div>
             <h7 class="text-dark"><center>Yang Membuat Pernyataan</center></h7>
-            <div class="row">
-                <div class="col-md-12">
-                    <div id="results">
-                        <h7 class="text-success">Gambar akan diambil jika Anda sudah mengeklik tombol "Ya"</h7>
-                    </div>
-                </div>
-                <div class="col-md-12 text-center">
-                    <br>
-                    <input type="button" class="btn btn-warning" value="Ya, Saya sebagai pembuat pernyataan" id="saveBtn">
-                    <button type="submit" class="btn btn-danger">Simpan</button>
-                    
-                </div>
+            <br/>
+            <div id="results"></div>
+            <div class="col-md-12 text-center">
+                <input type="button" class="btn btn-warning" value="Ya, Saya sebagai pembuat pernyataan" id="saveBtn">
+                <button type="submit" class="btn btn-danger">Simpan</button>
             </div>
         </form>
     </div>
+
     <script src="js/jquery-3.3.1.slim.min.js"></script>
-    <!-- Bootstrap JS v4.1.3 -->
     <script src="js/bootstrap.min.js"></script>
     <script>
-// Inisialisasi canvas
-const canvas = document.getElementById("signaturePad");
-const ctx = canvas.getContext("2d");
-let isDrawing = false;
+        // Inisialisasi canvas
+        const canvas = document.getElementById("signaturePad");
+        const ctx = canvas.getContext("2d");
+        let isDrawing = false;
 
-// Variabel untuk melacak area gambar
-let minX, minY, maxX, maxY;
+        // Variabel untuk menyimpan status gambar
+        let savedImage = null;
 
-// Fungsi untuk merespons perubahan ukuran layar
-function resizeCanvas() {
-    // Simpan gambar sementara
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    tempCanvas.getContext("2d").drawImage(canvas, 0, 0);
+        // Resize canvas agar sesuai dengan layar
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = 300; // Tinggi tetap
 
-    // Atur ulang ukuran canvas sesuai elemen induk
-    canvas.width = canvas.parentElement.offsetWidth;
-    canvas.height = canvas.offsetHeight || 300;
+            // Gambar ulang jika ada gambar yang disimpan
+            if (savedImage) {
+                const img = new Image();
+                img.src = savedImage;
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0);
+                };
+            }
+        }
 
-    // Salin kembali gambar
-    ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+        // Mendapatkan posisi relatif pada canvas
+        function getPos(event) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
 
-    // Reset koordinat batas
-    minX = canvas.width;
-    minY = canvas.height;
-    maxX = 0;
-    maxY = 0;
-}
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
 
-// Fungsi untuk mendapatkan posisi kursor (mouse/touch) relatif terhadap canvas
-function getPos(event) {
-    const rect = canvas.getBoundingClientRect();
-    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+        // Mulai menggambar
+        function startDrawing(event) {
+            isDrawing = true;
+            const pos = getPos(event);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
 
-    return {
-        x: (clientX - rect.left) * (canvas.width / rect.width),
-        y: (clientY - rect.top) * (canvas.height / rect.height),
-    };
-}
+        // Menggambar
+        function draw(event) {
+            if (!isDrawing) return;
 
-// Mulai menggambar
-function startDrawing(event) {
-    isDrawing = true;
-    const pos = getPos(event);
-    ctx.moveTo(pos.x, pos.y);
+            const pos = getPos(event);
+            ctx.lineWidth = 2;
+            ctx.lineCap = "round";
+            ctx.strokeStyle = "#000";
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
 
-    // Perbarui batas awal
-    minX = Math.min(minX, pos.x);
-    minY = Math.min(minY, pos.y);
-}
+            // Simpan status gambar setiap kali menggambar
+            savedImage = canvas.toDataURL();
+        }
 
-// Menggambar
-function draw(event) {
-    if (!isDrawing) return;
-    const pos = getPos(event);
+        // Berhenti menggambar
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.closePath();
 
-    // Perbarui batas area gambar
-    minX = Math.min(minX, pos.x);
-    minY = Math.min(minY, pos.y);
-    maxX = Math.max(maxX, pos.x);
-    maxY = Math.max(maxY, pos.y);
+            // Simpan status gambar terakhir
+            savedImage = canvas.toDataURL();
+        }
 
-    // Gambar garis
-    ctx.lineWidth = 1; // Ketebalan garis yang lebih tipis
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#000";
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-}
+        // Menghapus canvas
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            savedImage = null; // Reset gambar
+        }
 
-// Berhenti menggambar
-function stopDrawing() {
-    isDrawing = false;
-    ctx.beginPath();
-}
+        // Fungsi untuk crop tanda tangan
+        function cropSignature() {
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let xMin = canvas.width, yMin = canvas.height, xMax = 0, yMax = 0;
 
-// Fungsi untuk menghapus canvas
-function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    minX = canvas.width;
-    minY = canvas.height;
-    maxX = 0;
-    maxY = 0;
-}
+            // Loop untuk menemukan batas tanda tangan
+            for (let y = 0; y < imgData.height; y++) {
+                for (let x = 0; x < imgData.width; x++) {
+                    const index = (y * imgData.width + x) * 4;
+                    const alpha = imgData.data[index + 3];
+                    if (alpha > 0) { // Pixel aktif
+                        if (x < xMin) xMin = x;
+                        if (y < yMin) yMin = y;
+                        if (x > xMax) xMax = x;
+                        if (y > yMax) yMax = y;
+                    }
+                }
+            }
 
-// Fungsi untuk menyimpan gambar tanda tangan
-function saveCanvas() {
-    if (maxX - minX <= 0 || maxY - minY <= 0) {
-        alert("Tanda tangan kosong. Silakan tanda tangan terlebih dahulu.");
-        return;
-    }
+            // Crop data gambar
+            const croppedWidth = xMax - xMin;
+            const croppedHeight = yMax - yMin;
 
-    // Tambahkan padding agar gambar tidak terpotong
-    const padding = 10; // Pixel tambahan di setiap sisi
-    const croppedWidth = maxX - minX + padding * 2;
-    const croppedHeight = maxY - minY + padding * 2;
+            const croppedCanvas = document.createElement("canvas");
+            croppedCanvas.width = croppedWidth;
+            croppedCanvas.height = croppedHeight;
+            const croppedCtx = croppedCanvas.getContext("2d");
 
-    // Tentukan skala resolusi tinggi (contoh: 3x lebih besar)
-    const scale = 3;
+            croppedCtx.putImageData(ctx.getImageData(xMin, yMin, croppedWidth, croppedHeight), 0, 0);
+            return croppedCanvas.toDataURL();
+        }
 
-    // Buat canvas sementara untuk cropping dengan resolusi tinggi
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = croppedWidth * scale;
-    tempCanvas.height = croppedHeight * scale;
-    const tempCtx = tempCanvas.getContext("2d");
+        // Menyimpan gambar tanda tangan
+        function saveCanvas() {
+            if (!savedImage) {
+                alert("Tanda tangan kosong. Silakan tanda tangan terlebih dahulu.");
+                return;
+            }
 
-    // Pastikan canvas sementara tetap transparan
-    // Tidak ada warna latar belakang, tetap transparan
+            const croppedImage = cropSignature(); // Crop gambar
+            document.querySelector(".image-tag").value = croppedImage;
+            document.getElementById("results").innerHTML = `<img src="${croppedImage}" alt="Signature" style="max-width: 100%;"/>`;
+        }
 
-    // Skala context agar gambar lebih tajam
-    tempCtx.scale(scale, scale);
+        // Event listeners
+        canvas.addEventListener("mousedown", startDrawing);
+        canvas.addEventListener("mousemove", draw);
+        canvas.addEventListener("mouseup", stopDrawing);
+        canvas.addEventListener("mouseleave", stopDrawing);
 
-    // Pindahkan gambar dengan padding
-    tempCtx.drawImage(
-        canvas,
-        minX - padding, minY - padding, croppedWidth, croppedHeight, // Area sumber (dengan padding)
-        0, 0, croppedWidth, croppedHeight                            // Area tujuan
-    );
+        canvas.addEventListener("touchstart", (event) => {
+            event.preventDefault();
+            startDrawing(event);
+        });
+        canvas.addEventListener("touchmove", (event) => {
+            event.preventDefault();
+            draw(event);
+        });
+        canvas.addEventListener("touchend", (event) => {
+            event.preventDefault();
+            stopDrawing();
+        });
 
-    // Simpan gambar sebagai Base64
-    const image = tempCanvas.toDataURL("image/png");
-    document.querySelector(".image-tag").value = image;
+        document.getElementById("clearBtn").addEventListener("click", clearCanvas);
+        document.getElementById("saveBtn").addEventListener("click", saveCanvas);
 
-    // Tampilkan gambar di halaman
-    document.getElementById("results").innerHTML = 
-        '<img src="' + image + '" alt="Signature" style="display: block; margin: 0 auto; max-width: 100%; height: auto;"/>';
-}
-
-// Event listener untuk mouse
-canvas.addEventListener("mousedown", startDrawing);
-canvas.addEventListener("mousemove", draw);
-canvas.addEventListener("mouseup", stopDrawing);
-canvas.addEventListener("mouseleave", stopDrawing);
-
-// Event listener untuk touch
-canvas.addEventListener("touchstart", startDrawing);
-canvas.addEventListener("touchmove", draw);
-canvas.addEventListener("touchend", stopDrawing);
-
-// Tombol untuk menghapus
-document.getElementById("clearBtn").addEventListener("click", clearCanvas);
-
-// Tombol untuk menyimpan
-document.getElementById("saveBtn").addEventListener("click", saveCanvas);
-
-// Sesuaikan ukuran canvas saat memuat dan saat mengubah ukuran layar
-window.addEventListener("load", resizeCanvas);
-window.addEventListener("resize", resizeCanvas);
-
-
+        window.addEventListener("resize", resizeCanvas);
+        window.addEventListener("load", resizeCanvas);
     </script>
 </body>
 </html>
+
 
 

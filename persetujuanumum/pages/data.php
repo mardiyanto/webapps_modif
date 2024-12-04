@@ -1,4 +1,18 @@
- <!-- Tabel Data Mahasiswa -->
+<div class="header">
+        <!-- Logo -->
+        <img src="../logo.png" alt="Logo Lampung" class="logo">
+        <!-- Nomor RM -->
+        <div class="rm-number">NO. <?=$nosurat;?></div>
+        <!-- Teks Utama -->
+        <div >
+            <h2><?=$namars?></h2>
+            <p>Jl. Pramuka No. 88 Rajabasa Bandar Lampung</p>
+            <p>Telp. (0721) 706402 Fax. (0721) 706402</p>
+        </div>
+    </div>
+        <!-- Garis Horizontal -->
+        <div class="divider"></div>
+    <!-- Tabel Data Mahasiswa -->
  <h7 class="text-dark"><b>I. KETENTUAN RAWAT INAP</b></h7>
             <br/>
             <table class="default" width="99%" border="0" align="center" cellpadding="3px" cellspacing="0px">

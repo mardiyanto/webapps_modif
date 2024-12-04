@@ -90,9 +90,14 @@
     }
 
     #results {
-    text-align: center;
-    background: #EEFFEE;
-    margin-top: 20px;
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            text-align: center;
+            /* width: 100%;
+            max-width: 600px; */
+        }
 }
 </style>
 

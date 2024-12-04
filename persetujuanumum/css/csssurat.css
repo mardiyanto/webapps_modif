@@ -1,0 +1,42 @@
+body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+}
+.header {
+	margin: 0 auto;
+	position: relative;
+	padding: 20px 0 10px; /* Menambahkan ruang vertikal */
+	text-align: center;
+}
+
+.logo {
+	width: 100px;
+	position: absolute;
+	top: 10px;
+	left: 0;
+}
+.rm-number {
+	position: absolute;
+	top: 10px;
+	right: 0;
+	font-size: 12px;
+	font-weight: bold;
+}
+.text {
+	margin-top: 20px; /* Memberikan jarak dari logo dan nomor RM */
+}
+.text h1 {
+	font-size: 18px;
+	margin: 5px 0;
+	font-weight: bold;
+}
+.text p {
+	margin: 5px 0;
+	font-size: 14px;
+}
+.divider {
+   
+	border: 1px solid black;
+	margin: 10px auto 0;
+}

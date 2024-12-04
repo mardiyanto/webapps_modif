@@ -10,6 +10,7 @@
             session_start();
             $_SESSION['ses_admin_persetujuanumum']="admin";
             $url = "index.php?act=Kamera";
+            
         }
     }
     header("Location:".$url);

@@ -242,7 +242,7 @@ function draw(event) {
     maxY = Math.max(maxY, pos.y);
 
     // Gambar garis
-    ctx.lineWidth = 1; // Ketebalan garis yang lebih tipis
+    ctx.lineWidth = 3;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#000";
     ctx.lineTo(pos.x, pos.y);
@@ -265,6 +265,7 @@ function clearCanvas() {
 }
 
 // Fungsi untuk menyimpan gambar tanda tangan
+// Fungsi untuk menyimpan gambar tanda tangan
 function saveCanvas() {
     if (maxX - minX <= 0 || maxY - minY <= 0) {
         alert("Tanda tangan kosong. Silakan tanda tangan terlebih dahulu.");
@@ -276,22 +277,15 @@ function saveCanvas() {
     const croppedWidth = maxX - minX + padding * 2;
     const croppedHeight = maxY - minY + padding * 2;
 
-    // Tentukan skala resolusi tinggi (contoh: 3x lebih besar)
-    const scale = 3;
-
-    // Buat canvas sementara untuk cropping dengan resolusi tinggi
+    // Buat canvas sementara untuk cropping
     const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = croppedWidth * scale;
-    tempCanvas.height = croppedHeight * scale;
+    tempCanvas.width = croppedWidth;
+    tempCanvas.height = croppedHeight;
     const tempCtx = tempCanvas.getContext("2d");
 
-    // Pastikan canvas sementara tetap transparan
-    // Tidak ada warna latar belakang, tetap transparan
-
-    // Skala context agar gambar lebih tajam
-    tempCtx.scale(scale, scale);
-
     // Pindahkan gambar dengan padding
+    tempCtx.fillStyle = "#fff"; // Warna latar belakang putih
+    tempCtx.fillRect(0, 0, croppedWidth, croppedHeight); // Isi background
     tempCtx.drawImage(
         canvas,
         minX - padding, minY - padding, croppedWidth, croppedHeight, // Area sumber (dengan padding)
@@ -306,6 +300,7 @@ function saveCanvas() {
     document.getElementById("results").innerHTML = 
         '<img src="' + image + '" alt="Signature" style="display: block; margin: 0 auto; max-width: 100%; height: auto;"/>';
 }
+
 
 // Event listener untuk mouse
 canvas.addEventListener("mousedown", startDrawing);
@@ -327,7 +322,6 @@ document.getElementById("saveBtn").addEventListener("click", saveCanvas);
 // Sesuaikan ukuran canvas saat memuat dan saat mengubah ukuran layar
 window.addEventListener("load", resizeCanvas);
 window.addEventListener("resize", resizeCanvas);
-
 
     </script>
 </body>

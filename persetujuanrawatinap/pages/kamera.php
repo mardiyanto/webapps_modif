@@ -81,10 +81,9 @@
     <!-- <script src="js/jquery.min.js"></script>
     <script src="js/webcam.min.js"></script> -->
     <link rel="stylesheet" href="css/bootstrap.min.css" />
-    <style type="text/css">
-        #results { padding: 0px; background:#EEFFEE; width: 490; height: 390 }
-    </style>
-        <style>
+    <link rel="stylesheet" href="../css/modal.css" />
+    <link rel="stylesheet" href="../css/csssurat.css" />
+    <style>
         .signature-pad {
             border: 1px solid #000;
             width: 100%;
@@ -96,18 +95,31 @@
             text-align: center;
         }
     </style>
+
+ 
 </head>
 <body>
     <div class="container">
-        <h5 class="text-dark"><center><button class="btn btn-secondary" onclick="window.location.reload();">Refresh</button><br/><br/>PERSETUJUAN PASIEN RAWAT INAP NO. <?=$nopersetujuan;?></center></h5>
+    <div class="header">
+        <!-- Logo -->
+        <img src="../logo.png" alt="Logo Lampung" class="logo">
+        <!-- Nomor RM -->
+        <div class="rm-number">NO. <?=$nopersetujuan;?></div>
+        <!-- Teks Utama -->
+        <div >
+            <h2><?=$namars?></h2>
+            <p>Jl. Pramuka No. 88 Rajabasa Bandar Lampung</p>
+            <p>Telp. (0721) 706402 Fax. (0721) 706402</p>
+        </div>
+    </div>
+    <!-- Garis Horizontal -->
+    <div class="divider"></div>
+        <h5 class="text-dark"><center><button class="btn btn-secondary" onclick="window.location.reload();">Refresh</button><br/><br/>PERSETUJUAN PASIEN RAWAT INAP </center></h5>
         <h7 class="text-dark"><center>Tanggal <?=$tanggal;?></center></h7><br/>
         <form method="POST" action="pages/storeImage.php" onsubmit="return validasiIsi();" enctype=multipart/form-data>
             <input type="hidden" name="nopersetujuan" value="<?=$nopersetujuan;?>">
             <input type="hidden" name="image" class="image-tag">
-            <h2>Tanda tangan di sini:</h2>
-            <canvas id="signaturePad" class="signature-pad"></canvas>
-            <button type="button" id="clearBtn" class="btn btn-secondary">Clear</button>
-            <br/>
+            
             <table class="default" width="100%" border="0" align="center" cellpadding="3px" cellspacing="0px">
                 <tr class="text-dark">
                     <td width="25%">Nama Pasien</td>
@@ -190,9 +202,12 @@
             </table>
             <br/>
             <br/>
+            <h7 class="text-dark"><b>TANDATANGAN DI SINI</b></h7>
+            <canvas id="signaturePad" class="signature-pad"></canvas><br>
+            <button type="button" id="clearBtn" class="btn btn-secondary">Ulangi Tanda Tangan</button><br><br>
             <h7 class="text-dark"><center>Yang Membuat Persetujuan</center></h7>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div id="results">
                         <h7 class="text-success">Gambar akan diambil jika Anda sudah mengeklik tombol "Ya"</h7>
                     </div>
@@ -206,147 +221,150 @@
             </div>
         </form>
     </div>
+    <script src="../js/jquery-3.3.1.slim.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
     <script>
- // Canvas setup
-var canvas = document.getElementById("signaturePad");
-var ctx = canvas.getContext("2d");
-var isDrawing = false;
+        // Inisialisasi canvas
+        const canvas = document.getElementById("signaturePad");
+        const ctx = canvas.getContext("2d");
+        let isDrawing = false;
 
-// Set canvas size
-canvas.width = 990;
-canvas.height = 300;
+        // Variabel untuk menyimpan status gambar
+        let savedImage = null;
 
-// Variables to track drawing bounds
-let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
+        // Resize canvas agar sesuai dengan layar
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = 300; // Tinggi tetap
 
-// Event listeners for mouse
-canvas.addEventListener("mousedown", startDrawing);
-canvas.addEventListener("mousemove", draw);
-canvas.addEventListener("mouseup", stopDrawing);
-canvas.addEventListener("mouseleave", stopDrawing);
+            // Gambar ulang jika ada gambar yang disimpan
+            if (savedImage) {
+                const img = new Image();
+                img.src = savedImage;
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0);
+                };
+            }
+        }
 
-// Event listeners for touch
-canvas.addEventListener("touchstart", startDrawingTouch);
-canvas.addEventListener("touchmove", drawTouch);
-canvas.addEventListener("touchend", stopDrawing);
+        // Mendapatkan posisi relatif pada canvas
+        function getPos(event) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
 
-// Functions for mouse events
-function startDrawing(e) {
-    isDrawing = true;
-    draw(e);
-}
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
 
-function draw(e) {
-    if (!isDrawing) return;
+        // Mulai menggambar
+        function startDrawing(event) {
+            isDrawing = true;
+            const pos = getPos(event);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
 
-    // Get cursor position relative to canvas
-    const x = e.clientX - canvas.offsetLeft;
-    const y = e.clientY - canvas.offsetTop;
+        // Menggambar
+        function draw(event) {
+            if (!isDrawing) return;
 
-    // Update bounds
-    minX = Math.min(minX, x);
-    minY = Math.min(minY, y);
-    maxX = Math.max(maxX, x);
-    maxY = Math.max(maxY, y);
+            const pos = getPos(event);
+            ctx.lineWidth = 2;
+            ctx.lineCap = "round";
+            ctx.strokeStyle = "#000";
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
 
-    // Draw
-    ctx.lineWidth = 3;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#000";
+            // Simpan status gambar setiap kali menggambar
+            savedImage = canvas.toDataURL();
+        }
 
-    ctx.lineTo(x, y);
-    ctx.stroke();
-}
+        // Berhenti menggambar
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.closePath();
 
-// Functions for touch events
-function startDrawingTouch(e) {
-    e.preventDefault();
-    isDrawing = true;
-    const touch = e.touches[0];
-    const x = touch.clientX - canvas.offsetLeft;
-    const y = touch.clientY - canvas.offsetTop;
-    ctx.moveTo(x, y);
-}
+            // Simpan status gambar terakhir
+            savedImage = canvas.toDataURL();
+        }
 
-function drawTouch(e) {
-    if (!isDrawing) return;
-    e.preventDefault();
-    const touch = e.touches[0];
-    const x = touch.clientX - canvas.offsetLeft;
-    const y = touch.clientY - canvas.offsetTop;
-
-    // Update bounds
-    minX = Math.min(minX, x);
-    minY = Math.min(minY, y);
-    maxX = Math.max(maxX, x);
-    maxY = Math.max(maxY, y);
-
-    // Draw
-    ctx.lineWidth = 3;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#000";
-
-    ctx.lineTo(x, y);
-    ctx.stroke();
-}
-
-// Stop drawing for both mouse and touch
-function stopDrawing() {
-    isDrawing = false;
-    ctx.beginPath();
-}
-
-        // Clear the canvas
-        document.getElementById("clearBtn").addEventListener("click", function() {
+        // Menghapus canvas
+        function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            minX = canvas.width;
-            minY = canvas.height;
-            maxX = 0;
-            maxY = 0;
-        });
+            savedImage = null; // Reset gambar
+        }
 
-        // Save canvas as cropped image
-        document.getElementById("saveBtn").addEventListener("click", function() {
-            // Crop the drawing area
-            const croppedWidth = maxX - minX;
-            const croppedHeight = maxY - minY;
+        // Fungsi untuk crop tanda tangan
+        function cropSignature() {
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let xMin = canvas.width, yMin = canvas.height, xMax = 0, yMax = 0;
 
-            if (croppedWidth <= 0 || croppedHeight <= 0) {
+            // Loop untuk menemukan batas tanda tangan
+            for (let y = 0; y < imgData.height; y++) {
+                for (let x = 0; x < imgData.width; x++) {
+                    const index = (y * imgData.width + x) * 4;
+                    const alpha = imgData.data[index + 3];
+                    if (alpha > 0) { // Pixel aktif
+                        if (x < xMin) xMin = x;
+                        if (y < yMin) yMin = y;
+                        if (x > xMax) xMax = x;
+                        if (y > yMax) yMax = y;
+                    }
+                }
+            }
+
+            // Crop data gambar
+            const croppedWidth = xMax - xMin;
+            const croppedHeight = yMax - yMin;
+
+            const croppedCanvas = document.createElement("canvas");
+            croppedCanvas.width = croppedWidth;
+            croppedCanvas.height = croppedHeight;
+            const croppedCtx = croppedCanvas.getContext("2d");
+
+            croppedCtx.putImageData(ctx.getImageData(xMin, yMin, croppedWidth, croppedHeight), 0, 0);
+            return croppedCanvas.toDataURL();
+        }
+
+        // Menyimpan gambar tanda tangan
+        function saveCanvas() {
+            if (!savedImage) {
                 alert("Tanda tangan kosong. Silakan tanda tangan terlebih dahulu.");
                 return;
             }
 
-            // Create a temporary canvas for cropping
-            const tempCanvas = document.createElement("canvas");
-            tempCanvas.width = croppedWidth;
-            tempCanvas.height = croppedHeight;
-            const tempCtx = tempCanvas.getContext("2d");
+            const croppedImage = cropSignature(); // Crop gambar
+            document.querySelector(".image-tag").value = croppedImage;
+            document.getElementById("results").innerHTML = `<img src="${croppedImage}" alt="Signature" style="max-width: 100%;"/>`;
+        }
 
-            // Draw the cropped area
-            tempCtx.drawImage(
-                canvas,
-                minX, minY, croppedWidth, croppedHeight, // Source
-                0, 0, croppedWidth, croppedHeight       // Destination
-            );
+        // Event listeners
+        canvas.addEventListener("mousedown", startDrawing);
+        canvas.addEventListener("mousemove", draw);
+        canvas.addEventListener("mouseup", stopDrawing);
+        canvas.addEventListener("mouseleave", stopDrawing);
 
-            // Get the cropped image as data URL
-            const image = tempCanvas.toDataURL("image/png");
-            document.querySelector(".image-tag").value = image;
-
-            // Display the cropped image in the results div
-            document.getElementById("results").innerHTML = 
-                '<img src="' + image + '" alt="Signature" style="max-width: 100%; height: auto;"/>';
+        canvas.addEventListener("touchstart", (event) => {
+            event.preventDefault();
+            startDrawing(event);
+        });
+        canvas.addEventListener("touchmove", (event) => {
+            event.preventDefault();
+            draw(event);
+        });
+        canvas.addEventListener("touchend", (event) => {
+            event.preventDefault();
+            stopDrawing();
         });
 
-        // Validate form
-        function validasiIsi() {
-            const image = document.querySelector(".image-tag").value;
-            if (image === "") {
-                alert("Silakan tanda tangan terlebih dahulu.");
-                return false;
-            }
-            return true;
-        }
+        document.getElementById("clearBtn").addEventListener("click", clearCanvas);
+        document.getElementById("saveBtn").addEventListener("click", saveCanvas);
+
+        window.addEventListener("resize", resizeCanvas);
+        window.addEventListener("load", resizeCanvas);
     </script>
 </body>
 </html>
